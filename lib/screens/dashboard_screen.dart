@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart'; 
-import '../services/api_service.dart'; // Import our new API Service
+import 'package:provider/provider.dart'; 
+import '../services/api_service.dart';
+import '../services/expense_provider.dart'; 
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -10,9 +12,9 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final double totalExpensesUSD = 1250.50;
   double exchangeRate = 1.0;
-  bool isLoading = true; // Track loading state
+  bool isLoading = true; 
+  bool _showInEGP = false; // 1. Added a toggle state!
 
   @override
   void initState() {
@@ -20,11 +22,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _getLiveExchangeRate();
   }
 
-  // Fetch data and update UI (Lab 6: Use StatefulWidget to hold API data)
   Future<void> _getLiveExchangeRate() async {
     final rate = await ApiService.fetchExchangeRate('EGP');
-    
-    // Add the setState method to notify the framework (Lab 6)
     if (mounted) {
       setState(() {
         exchangeRate = rate;
@@ -35,7 +34,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Calculate live total
+    final expenses = Provider.of<ExpenseProvider>(context).expenses;
+
+    double totalExpensesUSD = 0;
+    double foodTotal = 0;
+    double transportTotal = 0;
+    double billsTotal = 0;
+    double otherTotal = 0;
+
+    for (var expense in expenses) {
+      totalExpensesUSD += expense.amount;
+      
+      if (expense.category == 'Food') {
+        foodTotal += expense.amount;
+      } else if (expense.category == 'Transport') {
+        transportTotal += expense.amount;
+      } else if (expense.category == 'Bills') {
+        billsTotal += expense.amount;
+      } else {
+        otherTotal += expense.amount;
+      }
+    }
+
     final double totalInEGP = totalExpensesUSD * exchangeRate;
 
     return Scaffold(
@@ -44,40 +64,63 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Total Spent This Month (Live EGP)',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+            // 2. Used a Row to put the Title and Button side-by-side
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Total Spent',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                ),
+                // 3. The Convert Button!
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.currency_exchange, size: 18),
+                  label: Text(_showInEGP ? 'View in USD' : 'Convert to EGP'),
+                  onPressed: () {
+                    setState(() {
+                      _showInEGP = !_showInEGP; // Flips the state
+                    });
+                  },
+                ),
+              ],
             ),
             const SizedBox(height: 8),
-            // Show a loading spinner while fetching from API
+            
+            // 4. Show the correct text based on the toggle state
             isLoading 
               ? const CircularProgressIndicator()
               : Text(
-                  'EGP ${totalInEGP.toStringAsFixed(2)}',
+                  _showInEGP 
+                      ? 'EGP ${totalInEGP.toStringAsFixed(2)}' 
+                      : '\$${totalExpensesUSD.toStringAsFixed(2)}',
                   style: const TextStyle(
                       fontSize: 36, 
                       fontWeight: FontWeight.bold, 
                       color: Colors.blue),
                 ),
+            
             const SizedBox(height: 30),
             const Text(
               'Spending by Category',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 20),
+            
             Expanded(
-              child: PieChart(
-                PieChartData(
-                  sectionsSpace: 2,
-                  centerSpaceRadius: 50,
-                  sections: [
-                    PieChartSectionData(color: Colors.redAccent, value: 40, title: 'Food', radius: 50, titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    PieChartSectionData(color: Colors.blueAccent, value: 30, title: 'Transport', radius: 50, titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    PieChartSectionData(color: Colors.greenAccent, value: 15, title: 'Bills', radius: 50, titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    PieChartSectionData(color: Colors.orangeAccent, value: 15, title: 'Other', radius: 50, titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-              ),
+              child: totalExpensesUSD == 0 
+                ? const Center(child: Text("Add expenses to see your chart!"))
+                : PieChart(
+                    PieChartData(
+                      sectionsSpace: 2,
+                      centerSpaceRadius: 50,
+                      sections: [
+                        if (foodTotal > 0) PieChartSectionData(color: Colors.redAccent, value: foodTotal, title: 'Food', radius: 50, titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        if (transportTotal > 0) PieChartSectionData(color: Colors.blueAccent, value: transportTotal, title: 'Transport', radius: 50, titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        if (billsTotal > 0) PieChartSectionData(color: Colors.greenAccent, value: billsTotal, title: 'Bills', radius: 50, titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        if (otherTotal > 0) PieChartSectionData(color: Colors.orangeAccent, value: otherTotal, title: 'Other', radius: 50, titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ),
             ),
           ],
         ),

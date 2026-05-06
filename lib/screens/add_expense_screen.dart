@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'camera_screen.dart'; // Import our new camera screen
+import 'package:provider/provider.dart';
+import 'camera_screen.dart';
+import '../models/expense.dart';
+import '../services/expense_provider.dart';
 
-// This must be Stateful to manage form input and the captured image (Lab 3)
 class AddExpenseScreen extends StatefulWidget {
   const AddExpenseScreen({super.key});
 
@@ -10,7 +12,33 @@ class AddExpenseScreen extends StatefulWidget {
 }
 
 class _AddExpenseScreenState extends State<AddExpenseScreen> {
-  String? receiptImagePath; // Variable to hold the photo path
+  String? receiptImagePath;
+  final _titleController = TextEditingController();
+  final _amountController = TextEditingController();
+  String _selectedCategory = 'Food';
+  final List<String> _categories = ['Food', 'Transport', 'Bills', 'Other'];
+
+  void _saveExpense() {
+    if (_titleController.text.isEmpty || _amountController.text.isEmpty) return;
+
+    final newExpense = Expense(
+      id: DateTime.now().toString(),
+      title: _titleController.text,
+      amount: double.parse(_amountController.text),
+      date: DateTime.now(),
+      category: _selectedCategory,
+    );
+
+    // Add to state and storage
+    Provider.of<ExpenseProvider>(context, listen: false).addExpense(newExpense);
+
+    // Clear form
+    _titleController.clear();
+    _amountController.clear();
+    setState(() => receiptImagePath = null);
+
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Expense Added!')));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,50 +47,39 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // TextFields for input (Lab 3)
-          const TextField(
-            decoration: InputDecoration(
-              labelText: 'Expense Title (e.g. Lunch)',
-              border: OutlineInputBorder(),
-            ),
-          ),
+          TextField(controller: _titleController, decoration: const InputDecoration(labelText: 'Expense Title', border: OutlineInputBorder())),
           const SizedBox(height: 16),
-          const TextField(
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: 'Amount (\$)',
-              border: OutlineInputBorder(),
-            ),
+          TextField(controller: _amountController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Amount (\$)', border: OutlineInputBorder())),
+          const SizedBox(height: 16),
+          
+          DropdownButtonFormField<String>(
+            value: _selectedCategory,
+            decoration: const InputDecoration(border: OutlineInputBorder(), labelText: 'Category'),
+            items: _categories.map((cat) => DropdownMenuItem(value: cat, child: Text(cat))).toList(),
+            onChanged: (val) => setState(() => _selectedCategory = val!),
           ),
           const SizedBox(height: 24),
           
-          // Button to open the Native Camera (Lab 3 & 5)
-          ElevatedButton.icon(
-            icon: const Icon(Icons.camera_alt),
-            label: const Text('Capture Receipt'),
-            onPressed: () async {
-              // Navigate to Camera Screen and wait for the result (Lab 4)
-              final imagePath = await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CameraScreen()),
-              );
-
-              // Update the UI if a photo was taken
-              if (imagePath != null) {
-                setState(() {
-                  receiptImagePath = imagePath;
-                });
-              }
-            },
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ElevatedButton.icon(
+                icon: const Icon(Icons.camera_alt),
+                label: const Text('Receipt'),
+                onPressed: () async {
+                  final imagePath = await Navigator.push(context, MaterialPageRoute(builder: (context) => const CameraScreen()));
+                  if (imagePath != null) setState(() => receiptImagePath = imagePath);
+                },
+              ),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.save),
+                label: const Text('Save Expense'),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+                onPressed: _saveExpense,
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-
-          // Show confirmation if image was captured
-          if (receiptImagePath != null)
-            const Text(
-              'Receipt photo attached!',
-              style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-            ),
+          if (receiptImagePath != null) const Padding(padding: EdgeInsets.only(top: 8.0), child: Text('Receipt attached!', style: TextStyle(color: Colors.green))),
         ],
       ),
     );

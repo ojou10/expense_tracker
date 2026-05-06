@@ -10,6 +10,7 @@ import 'screens/add_expense_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/login_screen.dart';
+import 'services/expense_provider.dart';
 
 late CameraDescription defaultCamera;
 
@@ -26,9 +27,12 @@ Future<void> main() async {
   }
 
   // Wrap the app in the ChangeNotifierProvider (Lab 7 concept)
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeProvider(),
+ runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => ExpenseProvider()), // New!
+      ],
       child: const ExpenseTrackerApp(),
     ),
   );

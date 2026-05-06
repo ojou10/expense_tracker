@@ -1,26 +1,16 @@
 import 'package:flutter/material.dart';
-import '../models/expense.dart'; // Your data blueprint
-import '../widgets/category_badge.dart'; // Your custom internet component!
+import 'package:provider/provider.dart';
+import '../widgets/category_badge.dart';
+import '../services/expense_provider.dart';
 
-class HistoryScreen extends StatefulWidget {
+class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
 
   @override
-  State<HistoryScreen> createState() => _HistoryScreenState();
-}
-
-class _HistoryScreenState extends State<HistoryScreen> {
-  // Dummy data to simulate our database
-  final List<Expense> _recentExpenses = [
-    Expense(id: '1', title: 'Groceries', amount: 45.50, date: DateTime.now().subtract(const Duration(days: 1)), category: 'Food'),
-    Expense(id: '2', title: 'Uber to University', amount: 12.00, date: DateTime.now().subtract(const Duration(days: 2)), category: 'Transport'),
-    Expense(id: '3', title: 'Netflix Subscription', amount: 15.99, date: DateTime.now().subtract(const Duration(days: 3)), category: 'Bills'),
-    Expense(id: '4', title: 'Coffee', amount: 4.50, date: DateTime.now().subtract(const Duration(days: 3)), category: 'Food'),
-    Expense(id: '5', title: 'New Mouse', amount: 25.00, date: DateTime.now().subtract(const Duration(days: 5)), category: 'Other'),
-  ];
-
-  @override
   Widget build(BuildContext context) {
+    // Listen to the ExpenseProvider
+    final expenses = Provider.of<ExpenseProvider>(context).expenses;
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -29,18 +19,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
           children: [
             const Padding(
               padding: EdgeInsets.all(8.0),
-              child: Text(
-                'Recent Transactions',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              child: Text('Recent Transactions', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ),
-            // Expanded allows the ListView to take up the remaining screen space
             Expanded(
-              // HERE IS THE LISTVIEW.BUILDER!
-              child: ListView.builder(
-                itemCount: _recentExpenses.length,
+              child: expenses.isEmpty 
+                ? const Center(child: Text("No expenses added yet!"))
+                : ListView.builder(
+                itemCount: expenses.length,
                 itemBuilder: (context, index) {
-                  final expense = _recentExpenses[index];
+                  final expense = expenses[index];
                   
                   return Card(
                     elevation: 2,
@@ -50,27 +37,19 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         backgroundColor: Theme.of(context).primaryColor,
                         child: const Icon(Icons.attach_money, color: Colors.white),
                       ),
-                      title: Text(
-                        expense.title,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      // HERE IS YOUR CUSTOM COMPONENT INTEGRATED!
+                      title: Text(expense.title, style: const TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 4),
                           Text('${expense.date.day}/${expense.date.month}/${expense.date.year}'),
                           const SizedBox(height: 4),
-                          CategoryBadge(category: expense.category), // Custom Widget
+                          CategoryBadge(category: expense.category),
                         ],
                       ),
                       trailing: Text(
                         '\$${expense.amount.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Colors.redAccent,
-                        ),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.redAccent),
                       ),
                     ),
                   );
