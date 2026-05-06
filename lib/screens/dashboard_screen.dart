@@ -14,7 +14,7 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   double exchangeRate = 1.0;
   bool isLoading = true; 
-  bool _showInEGP = false; // 1. Added a toggle state!
+  bool _showInEGP = false; 
 
   @override
   void initState() {
@@ -34,6 +34,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 1. Grab the REAL list of expenses from the Provider
     final expenses = Provider.of<ExpenseProvider>(context).expenses;
 
     double totalExpensesUSD = 0;
@@ -64,46 +65,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 2. Used a Row to put the Title and Button side-by-side
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Total Spent',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                ),
-                // 3. The Convert Button!
+                const Text('Total Spent', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
                 OutlinedButton.icon(
                   icon: const Icon(Icons.currency_exchange, size: 18),
                   label: Text(_showInEGP ? 'View in USD' : 'Convert to EGP'),
-                  onPressed: () {
-                    setState(() {
-                      _showInEGP = !_showInEGP; // Flips the state
-                    });
-                  },
+                  onPressed: () => setState(() => _showInEGP = !_showInEGP),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            
-            // 4. Show the correct text based on the toggle state
             isLoading 
               ? const CircularProgressIndicator()
               : Text(
-                  _showInEGP 
-                      ? 'EGP ${totalInEGP.toStringAsFixed(2)}' 
-                      : '\$${totalExpensesUSD.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                      fontSize: 36, 
-                      fontWeight: FontWeight.bold, 
-                      color: Colors.blue),
+                  _showInEGP ? 'EGP ${totalInEGP.toStringAsFixed(2)}' : '\$${totalExpensesUSD.toStringAsFixed(2)}',
+                  style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.blue),
                 ),
-            
             const SizedBox(height: 30),
-            const Text(
-              'Spending by Category',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-            ),
+            const Text('Spending by Category', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
             const SizedBox(height: 20),
             
             Expanded(

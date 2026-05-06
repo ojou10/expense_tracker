@@ -49,8 +49,16 @@ class ExpenseTrackerApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Expense Tracker',
       themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      theme: ThemeData.light(useMaterial3: true),
-      darkTheme: ThemeData.dark(useMaterial3: true),
+      
+      // APPLY POPPINS TO LIGHT THEME
+      theme: ThemeData.light(useMaterial3: true).copyWith(
+        textTheme: ThemeData.light().textTheme.apply(fontFamily: 'Poppins'),
+      ),
+      
+      // APPLY POPPINS TO DARK THEME
+      darkTheme: ThemeData.dark(useMaterial3: true).copyWith(
+        textTheme: ThemeData.dark().textTheme.apply(fontFamily: 'Poppins'),
+      ),
       
       // Lab 4: Using Named Routes
       initialRoute: '/',

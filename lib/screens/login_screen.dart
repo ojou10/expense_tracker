@@ -59,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center, 
           children: [
-            const Icon(Icons.account_balance_wallet, size: 100, color: Colors.blue),
+            Image.asset('assets/images/logo.png', height: 100),
             const SizedBox(height: 16),
             Text(_isLoginMode ? 'Welcome Back' : 'Create Account', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
             const SizedBox(height: 32),

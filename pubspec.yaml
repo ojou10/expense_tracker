@@ -37,3 +37,11 @@ flutter:
   # Registering local assets (Lab 2)
   assets:
     - assets/images/
+
+    # Adding Custom Fonts (Requirement 6)
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
