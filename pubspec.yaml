@@ -1,0 +1,39 @@
+name: expense_tracker
+description: "A new Flutter project."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Lab 5: Native Features & Custom Internet Component
+  camera: ^0.10.5+5
+  fl_chart: ^0.65.0
+  
+  # Lab 6: API & Firebase
+  http: ^1.1.2
+  firebase_core: ^4.7.0
+  firebase_auth: ^6.4.0
+  
+  # Lab 7: Local Storage
+  shared_preferences: ^2.2.2
+
+  cupertino_icons: ^1.0.6
+  provider: ^6.1.5+1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+# ONLY ONE flutter block down here!
+flutter:
+  uses-material-design: true
+
+  # Registering local assets (Lab 2)
+  assets:
+    - assets/images/
