@@ -19,12 +19,29 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final List<String> _categories = ['Food', 'Transport', 'Bills', 'Other'];
 
   void _saveExpense() {
-    if (_titleController.text.isEmpty || _amountController.text.isEmpty) return;
+    // 1. Check if fields are empty
+    if (_titleController.text.isEmpty || _amountController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields')),
+      );
+      return;
+    }
 
+    // 2. Safely try to convert the text to a number (Prevents the "meow" crash!)
+    final parsedAmount = double.tryParse(_amountController.text);
+    
+    if (parsedAmount == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid number for the amount')),
+      );
+      return;
+    }
+
+    // 3. Create the expense using the safely parsed amount
     final newExpense = Expense(
       id: DateTime.now().toString(),
       title: _titleController.text,
-      amount: double.parse(_amountController.text),
+      amount: parsedAmount,
       date: DateTime.now(),
       category: _selectedCategory,
     );
@@ -37,7 +54,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     _amountController.clear();
     setState(() => receiptImagePath = null);
 
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Expense Added!')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Expense Added!')),
+    );
   }
 
   @override
@@ -47,9 +66,16 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextField(controller: _titleController, decoration: const InputDecoration(labelText: 'Expense Title', border: OutlineInputBorder())),
+          TextField(
+            controller: _titleController, 
+            decoration: const InputDecoration(labelText: 'Expense Title', border: OutlineInputBorder())
+          ),
           const SizedBox(height: 16),
-          TextField(controller: _amountController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Amount (\$)', border: OutlineInputBorder())),
+          TextField(
+            controller: _amountController, 
+            keyboardType: TextInputType.number, 
+            decoration: const InputDecoration(labelText: 'Amount (\$)', border: OutlineInputBorder())
+          ),
           const SizedBox(height: 16),
           
           DropdownButtonFormField<String>(
@@ -79,7 +105,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               ),
             ],
           ),
-          if (receiptImagePath != null) const Padding(padding: EdgeInsets.only(top: 8.0), child: Text('Receipt attached!', style: TextStyle(color: Colors.green))),
+          if (receiptImagePath != null) 
+            const Padding(
+              padding: EdgeInsets.only(top: 8.0), 
+              child: Text('Receipt attached!', style: TextStyle(color: Colors.green))
+            ),
         ],
       ),
     );

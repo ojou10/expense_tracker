@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:provider/provider.dart'; // Added Provider
-import '../services/theme_provider.dart'; // Added our new provider
+import 'package:provider/provider.dart'; 
+import '../services/theme_provider.dart'; 
 import 'package:firebase_auth/firebase_auth.dart';
+import '../services/expense_provider.dart'; // ADDED: Our custom ExpenseProvider
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -39,7 +40,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Listen to the provider to get the current switch state
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Padding(
@@ -89,7 +89,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           SwitchListTile(
             title: const Text('Enable Dark Mode Theme'),
             subtitle: const Text('Save preference locally'),
-            // Connect the switch directly to the provider!
             value: themeProvider.isDarkMode,
             onChanged: (value) {
               themeProvider.toggleTheme(value);
@@ -106,11 +105,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               label: const Text('Sign Out'),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
               onPressed: () async {
+                Provider.of<ExpenseProvider>(context, listen: false).clearExpenses();
                 await FirebaseAuth.instance.signOut();
                 if (context.mounted) {
-                  Navigator.pushReplacementNamed(context, '/'); // Send back to Login
+                  Navigator.pushReplacementNamed(context, '/'); 
                 }
-              },
+              }, // FIXED: Removed double comma
             ),
           ),
         ],

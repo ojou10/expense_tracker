@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart'; 
+import '../services/expense_provider.dart'; 
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,7 +12,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _isPasswordHidden = true;
-  bool _isLoginMode = true; // Toggle between Login and Register
+  bool _isLoginMode = true; 
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false; 
@@ -25,20 +27,22 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       if (_isLoginMode) {
-        // Sign In
         await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
       } else {
-        // Register New User
         await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
       }
       
-      if (mounted) Navigator.pushReplacementNamed(context, '/home');
+      if (mounted) {
+        // Now it knows what ExpenseProvider is!
+        Provider.of<ExpenseProvider>(context, listen: false).loadExpenses();
+        Navigator.pushReplacementNamed(context, '/home');
+      }
       
     } on FirebaseAuthException catch (e) {
       if (mounted) {
