@@ -13,6 +13,7 @@ dependencies:
   # Lab 5: Native Features & Custom Internet Component
   camera: ^0.10.5+5
   fl_chart: ^0.65.0
+  permission_handler: ^12.0.1
   
   # Lab 6: API & Firebase
   http: ^1.1.2
