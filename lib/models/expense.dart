@@ -4,8 +4,16 @@ class Expense {
   final double amount;
   final DateTime date;
   final String category;
+  final String? userId;
 
-  Expense({required this.id, required this.title, required this.amount, required this.date, required this.category});
+  Expense({
+    required this.id,
+    required this.title,
+    required this.amount,
+    required this.date,
+    required this.category,
+    this.userId,
+  });
 
   // Serialization (Lab 7)
   Map<String, dynamic> toJson() => {
@@ -14,15 +22,16 @@ class Expense {
     'amount': amount,
     'date': date.toIso8601String(),
     'category': category,
+    if (userId != null) 'userId': userId,
   };
 
   // Deserialization (Lab 7)
   factory Expense.fromJson(Map<String, dynamic> json) => Expense(
     id: json['id'],
     title: json['title'],
-    // FIXED: 'as num' allows both ints and doubles to be parsed safely
-    amount: (json['amount'] as num).toDouble(), 
+    amount: (json['amount'] as num).toDouble(),
     date: DateTime.parse(json['date']),
     category: json['category'],
+    userId: json['userId'] as String?,
   );
 }
