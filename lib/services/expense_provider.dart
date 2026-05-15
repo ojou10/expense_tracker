@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Added Firebase Auth
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // 1. ADD FIRESTORE IMPORT
 import '../models/expense.dart';
 
 class ExpenseProvider with ChangeNotifier {
@@ -9,16 +10,14 @@ class ExpenseProvider with ChangeNotifier {
   List<Expense> get expenses => _expenses;
 
   ExpenseProvider() {
-    loadExpenses(); // Load automatically when created
+    loadExpenses(); 
   }
 
-  // Magic Key: Appends the unique Firebase User ID to the storage file!
   String get _storageKey {
     final userId = FirebaseAuth.instance.currentUser?.uid ?? 'guest';
     return 'saved_expenses_$userId';
   }
 
-  // Load from LocalStorage (Now User-Specific)
   Future<void> loadExpenses() async {
     final prefs = await SharedPreferences.getInstance();
     final String? expensesJson = prefs.getString(_storageKey);
@@ -27,22 +26,35 @@ class ExpenseProvider with ChangeNotifier {
       final List<dynamic> decodedData = json.decode(expensesJson);
       _expenses = decodedData.map((item) => Expense.fromJson(item)).toList();
     } else {
-      _expenses = []; // If new user, start with empty list
+      _expenses = []; 
     }
     notifyListeners();
   }
 
-  // Add and Save to LocalStorage (Now User-Specific)
+  // UPDATED: Now saves locally AND to the Cloud API (Req 7 & 8)
   Future<void> addExpense(Expense expense) async {
     _expenses.insert(0, expense); 
     notifyListeners();
     
+    // Requirement 7: Store Data Locally
     final prefs = await SharedPreferences.getInstance();
     final String encodedData = json.encode(_expenses.map((e) => e.toJson()).toList());
     await prefs.setString(_storageKey, encodedData);
+
+    // Requirement 8: API Integration to Store Data (Firestore API)
+    try {
+      final userId = FirebaseAuth.instance.currentUser?.uid ?? 'guest';
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('expenses')
+          .doc(expense.id)
+          .set(expense.toJson()); // Sends the JSON to the cloud!
+    } catch (e) {
+      print("Failed to store to API: $e");
+    }
   }
 
-  // Wipe the screen when logging out
   void clearExpenses() {
     _expenses = [];
     notifyListeners();
