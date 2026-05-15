@@ -21,9 +21,11 @@ Future<void> main() async {
   
   try {
     final cameras = await availableCameras();
-    defaultCamera = cameras.first;
+    if (cameras.isNotEmpty) {
+      defaultCamera = cameras.first;
+    }
   } catch (e) {
-    print('Error initializing camera: $e');
+    debugPrint('Error initializing camera: $e');
   }
 
   // Wrap the app in the ChangeNotifierProvider (Lab 7 concept)
