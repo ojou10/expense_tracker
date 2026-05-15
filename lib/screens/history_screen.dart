@@ -1,3 +1,4 @@
+import 'dart:io'; 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../widgets/category_badge.dart';
@@ -47,9 +48,39 @@ class HistoryScreen extends StatelessWidget {
                           CategoryBadge(category: expense.category),
                         ],
                       ),
-                      trailing: Text(
-                        '\$${expense.amount.toStringAsFixed(2)}',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.redAccent),
+                      
+                      // UPDATED: Now shows a Row with the Receipt Icon and the Amount
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min, // Keeps the row tight to the right side
+                        children: [
+                          // Only show the button if there is a receipt path
+                          if (expense.receiptPath != null)
+                            IconButton(
+                              icon: const Icon(Icons.receipt_long, color: Colors.blue),
+                              onPressed: () {
+                                // Pop-up dialog to show the image
+                                showDialog(
+                                  context: context,
+                                  builder: (_) => AlertDialog(
+                                    title: const Text('Receipt'),
+                                    content: Image.file(File(expense.receiptPath!)),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text('Close'),
+                                      )
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                            
+                          // Your original price text
+                          Text(
+                            '\$${expense.amount.toStringAsFixed(2)}',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.redAccent),
+                          ),
+                        ],
                       ),
                     ),
                   );

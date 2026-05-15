@@ -1,16 +1,17 @@
 //main.dart
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:provider/provider.dart'; // Added Provider
-import 'package:firebase_core/firebase_core.dart'; // 1. ADD THIS IMPORT (Lab 6)
+import 'package:provider/provider.dart'; 
+import 'package:firebase_core/firebase_core.dart'; 
 
-import 'services/theme_provider.dart'; // Added our new provider
+import 'services/theme_provider.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/add_expense_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/login_screen.dart';
 import 'services/expense_provider.dart';
+
 
 late CameraDescription defaultCamera;
 

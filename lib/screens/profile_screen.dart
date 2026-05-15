@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart'; 
 import '../services/theme_provider.dart'; 
 import 'package:firebase_auth/firebase_auth.dart';
-import '../services/expense_provider.dart'; // ADDED: Our custom ExpenseProvider
+import '../services/expense_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -24,14 +24,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _loadName() async {
     final prefs = await SharedPreferences.getInstance();
+    // 1. Grab the unique user ID
+    final userId = FirebaseAuth.instance.currentUser?.uid ?? 'guest';
+    
     setState(() {
-      userName = prefs.getString('userName') ?? "Student";
+      // 2. Load the name specific to THIS user
+      userName = prefs.getString('userName_$userId') ?? "Student";
     });
   }
 
   Future<void> _saveName(String name) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('userName', name);
+    // 1. Grab the unique user ID
+    final userId = FirebaseAuth.instance.currentUser?.uid ?? 'guest';
+    
+    // 2. Save the name tied to THIS user's ID
+    await prefs.setString('userName_$userId', name);
+    
     setState(() {
       userName = name;
     });
@@ -110,7 +119,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 if (context.mounted) {
                   Navigator.pushReplacementNamed(context, '/'); 
                 }
-              }, // FIXED: Removed double comma
+              }, 
             ),
           ),
         ],

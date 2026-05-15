@@ -44,6 +44,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       amount: parsedAmount,
       date: DateTime.now(),
       category: _selectedCategory,
+      receiptPath: receiptImagePath,
     );
 
     // Add to state and storage
