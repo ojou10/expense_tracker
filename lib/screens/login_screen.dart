@@ -17,6 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false; 
 
+  // --- FUNCTION 1: SUBMIT AUTH ---
   Future<void> _submitAuth() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter email and password')));
@@ -52,8 +53,45 @@ class _LoginScreenState extends State<LoginScreen> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
-  }
+  } // <--- NOTICE THIS CLOSING BRACE! _submitAuth ends here.
 
+  // --- FUNCTION 2: RESET PASSWORD (Bonus) ---
+  Future<void> _resetPassword() async {
+    final email = _emailController.text.trim();
+    
+    // 1. Check if they actually typed an email
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your email address in the box first.')),
+      );
+      return;
+    }
+
+    // 2. Ask Firebase to send the email
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Password reset email sent! Check your inbox.'),
+            backgroundColor: Colors.green, 
+          ),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message ?? 'Failed to send reset email.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  } // <--- _resetPassword ends here.
+
+  // --- FUNCTION 3: THE UI BUILDER ---
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,6 +123,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
+
+            if (_isLoginMode)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: _resetPassword,
+                  child: const Text('Forgot Password?'),
+                ),
+              ),
+
             const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
