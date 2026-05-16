@@ -20,9 +20,14 @@ A Flutter-based mobile application for tracking personal expenses with receipt p
    - [Prerequisites](#prerequisites)
    - [Installation](#installation)
    - [Firebase Setup](#firebase-setup)
-9. [Project Structure](#project-structure)
-10. [Conclusion](#conclusion)
-11. [References](#references)
+9. [Who Did What](#who-did-what)
+   - [Team Members & Responsibilities](#team-members--responsibilities)
+   - [File Ownership Matrix](#file-ownership-matrix)
+   - [Integration Points](#integration-points)
+   - [Component-Based Skills Covered](#component-based-skills-covered)
+10. [Project Structure](#project-structure)
+11. [Conclusion](#conclusion)
+12. [References](#references)
 
 ---
 
@@ -78,54 +83,132 @@ Managing personal finances is a common challenge for students and professionals 
 
 ### Use Case Diagram
 
-```
-┌─────────────────────────────────────────────────────┐
-│                   Expense Tracker                    │
-│                                                     │
-│  ┌──────────┐                                       │
-│  │   User   │                                       │
-│  └────┬─────┘                                       │
-│       │                                             │
-│       ├── Register / Login ────── Firebase Auth     │
-│       ├── View Dashboard ──────── PieChart + API    │
-│       ├── Add Expense ──────────── Local + Firestore│
-│       ├── Capture Receipt ──────── Device Camera    │
-│       ├── View History ─────────── Expense List     │
-│       ├── Manage Profile ──────── Name + Theme      │
-│       └── Logout ───────────────── Clear Session    │
-│                                                     │
-└─────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    User((User))
+
+    subgraph "Expense Tracker System"
+        Login[Register / Login]
+        Dashboard[View Dashboard]
+        AddExpense[Add Expense]
+        Receipt[Capture Receipt]
+        History[View History]
+        Profile[Manage Profile]
+        Logout[Logout]
+    end
+
+    subgraph "External Services"
+        FirebaseAuth[(Firebase Auth)]
+        Firestore[(Cloud Firestore)]
+        CameraAPI[Device Camera]
+        ExchangeAPI[Exchange Rate API]
+        LocalStorage[(SharedPreferences)]
+    end
+
+    User --> Login
+    User --> Dashboard
+    User --> AddExpense
+    User --> Receipt
+    User --> History
+    User --> Profile
+    User --> Logout
+
+    Login --> FirebaseAuth
+    Dashboard --> ExchangeAPI
+    Dashboard --> Firestore
+    AddExpense --> Firestore
+    AddExpense --> LocalStorage
+    AddExpense --> Receipt
+    Receipt --> CameraAPI
+    History --> Firestore
+    History --> LocalStorage
+    Profile --> FirebaseAuth
+    Profile --> LocalStorage
+    Logout --> FirebaseAuth
 ```
 
 ### Class Diagram
 
+```mermaid
+classDiagram
+    class Expense {
+        +String id
+        +String title
+        +double amount
+        +DateTime date
+        +String category
+        +String? userId
+        +toJson() Map~String,dynamic~
+        +fromJson(json) Expense$
+    }
+
+    class ExpenseProvider {
+        -List~Expense~ _expenses
+        -FirebaseFirestore _firestore
+        +List~Expense~ expenses
+        +loadExpenses() Future~void~
+        +addExpense(expense) Future~void~
+        +deleteExpense(id) Future~void~
+        +clearExpenses() void
+        -_loadFromLocal() Future~void~
+        -_saveToLocal() Future~void~
+    }
+
+    class ThemeProvider {
+        -bool _isDarkMode
+        +bool isDarkMode
+        +toggleTheme(value) void
+    }
+
+    class ApiService {
+        +fetchExchangeRate(target)$ Future~double~
+    }
+
+    class CategoryBadge {
+        +String category
+        -_getCategoryColor() Color
+    }
+
+    class CameraScreen {
+        -CameraController _controller
+        -_initCamera() Future~void~
+        -_takePicture() Future~void~
+    }
+
+    class LoginScreen {
+        -_submitAuth() Future~void~
+    }
+
+    class DashboardScreen {
+        -_getLiveExchangeRate() Future~void~
+    }
+
+    class AddExpenseScreen {
+        -_saveExpense() void
+    }
+
+    class HistoryScreen {
+    }
+
+    class ProfileScreen {
+        -_loadName() Future~void~
+        -_saveName(name) Future~void~
+    }
+
+    DashboardScreen --> ExpenseProvider : reads
+    DashboardScreen --> ApiService : calls
+    AddExpenseScreen --> ExpenseProvider : writes
+    AddExpenseScreen --> CameraScreen : navigates
+    HistoryScreen --> ExpenseProvider : reads
+    HistoryScreen --> CategoryBadge : uses
+    ProfileScreen --> ThemeProvider : toggles
+    LoginScreen --> ExpenseProvider : loads on success
+    ExpenseProvider --> Expense : manages
+    ExpenseProvider --> SharedPreferences : local cache
+    ExpenseProvider --> Firestore : cloud sync
+    ThemeProvider --> SharedPreferences : persists
 ```
-┌──────────────────┐       ┌─────────────────────┐
-│     Expense      │       │   ExpenseProvider    │
-├──────────────────┤       ├─────────────────────┤
-│ + id: String     │       │ - _expenses: List    │
-│ + title: String  │       │ - _firestore: Fire.. │
-│ + amount: double │       │ - _userId: String    │
-│ + date: DateTime │       ├─────────────────────┤
-│ + category: Str  │       │ + loadExpenses()     │
-│ + userId: String?│       │ + addExpense()       │
-├──────────────────┤       │ + deleteExpense()    │
-│ + toJson()       │       │ + clearExpenses()    │
-│ + fromJson()     │       │ - _loadFromLocal()   │
-└──────────────────┘       │ - _saveToLocal()     │
-                           └─────────────────────┘
-                                    │
-                           uses Provider pattern
-                                    │
-┌──────────────────┐       ┌─────────────────────┐
-│  ThemeProvider   │       │    ApiService        │
-├──────────────────┤       ├─────────────────────┤
-│ - _isDarkMode    │       │ + fetchExchangeRate()│
-├──────────────────┤       │   (static method)    │
-│ + toggleTheme()  │       └─────────────────────┘
-└──────────────────┘                │
-                           calls open.er-api.com
-```
+
 
 ### Components Used
 
@@ -212,6 +295,65 @@ service cloud.firestore {
   }
 }
 ```
+
+---
+
+## Who Did What
+
+### Team Members & Responsibilities
+
+| # | Member Role | Focus Area | Files Owned | Key Responsibilities |
+|---|------------|------------|-------------|---------------------|
+| 1 | **Authentication Component Developer** | Firebase Auth & User Management | `lib/screens/login_screen.dart`, `lib/main.dart` (Firebase init) | `_submitAuth()` — email/password login & registration, Firebase Auth setup, user session management, auth error handling, password visibility toggle |
+| 2 | **UI Component Designer** | Custom Widgets & Visual Components | `lib/widgets/category_badge.dart`, `lib/screens/add_expense_screen.dart`, `lib/screens/profile_screen.dart` | `CategoryBadge` custom component, `_getCategoryColor()` logic, AddExpense form UI, Profile screen layout, custom styling & theming |
+| 3 | **Navigation & State Management** | Provider Architecture & App Navigation | `lib/main.dart` (MainNavigation, routes, MultiProvider), `lib/services/theme_provider.dart`, `lib/services/expense_provider.dart` (architecture) | `MainNavigation` TabBar controller, named route config (`/`, `/home`), `ThemeProvider` toggle logic, Provider initialization & ChangeNotifier setup, navigation flow |
+| 4 | **Data Model & Local Storage** | Data Persistence & Storage Layer | `lib/models/expense.dart`, `lib/services/expense_provider.dart` (storage methods) | `Expense` model definition, `loadExpenses()` from SharedPreferences, `addExpense()` local persistence, `clearExpenses()`, JSON serialization (`toJson`/`fromJson`), user-specific storage keys |
+| 5 | **API & Cloud Integration** | External APIs & Firestore Backend | `lib/services/api_service.dart`, `lib/services/expense_provider.dart` (Firestore methods), `lib/screens/dashboard_screen.dart` (exchange rate) | `ApiService.fetchExchangeRate()`, Firestore collection setup, `expense.set()` cloud storage, API error handling, currency conversion, `_getLiveExchangeRate()` |
+| 6 | **Advanced Features & Visualization** | Native Features & Data Visualization | `lib/screens/camera_screen.dart`, `lib/screens/dashboard_screen.dart` (charts), `lib/screens/history_screen.dart` | Camera widget, camera init & controller, `takePicture()` photo capture, `PieChart` visualization (fl_chart), category spending breakdown, history display, `FutureBuilder` async camera loading |
+
+### File Ownership Matrix
+
+| File | Primary Owner | Supporting Members |
+|------|--------------|-------------------|
+| `lib/main.dart` | Member 3 | Member 1 |
+| `lib/screens/login_screen.dart` | Member 1 | — |
+| `lib/screens/dashboard_screen.dart` | Member 6 | Members 5, 4 |
+| `lib/screens/add_expense_screen.dart` | Member 2 | Member 4 |
+| `lib/screens/profile_screen.dart` | Member 2 | Member 1 |
+| `lib/screens/camera_screen.dart` | Member 6 | — |
+| `lib/screens/history_screen.dart` | Member 6 | Member 4 |
+| `lib/widgets/category_badge.dart` | Member 2 | — |
+| `lib/models/expense.dart` | Member 4 | Member 2 |
+| `lib/services/theme_provider.dart` | Member 3 | Member 2 |
+| `lib/services/expense_provider.dart` | Member 3 (structure) + Member 4 (storage) + Member 5 (API) | — |
+| `lib/services/api_service.dart` | Member 5 | — |
+| `pubspec.yaml` | All | Dependencies tracking |
+
+### Integration Points
+
+| Integration | Members Involved | Description |
+|------------|-----------------|-------------|
+| Login → Navigation | Members 1 & 3 | Auth success triggers route to home screen |
+| Provider → Screens | Members 3 & 4 | Provider sends expense data to all consuming screens |
+| Local ↔ Cloud Sync | Members 4 & 5 | SharedPreferences cache syncs with Firestore |
+| API → Dashboard | Members 5 & 6 | Exchange rate API data displayed on dashboard |
+| CategoryBadge → History | Members 2 & 6 | Custom badge component used in history list |
+| Expense Model → Charts | Members 4 & 6 | Expense data model consumed by pie chart visualization |
+
+### Component-Based Skills Covered
+
+| Skill | Responsible Member | Implementation |
+|-------|-------------------|---------------|
+| Custom Components | Member 2 | `CategoryBadge` widget |
+| State Management | Member 3 | Provider + ChangeNotifier |
+| Plugin Integration | Members 5, 6 | Firebase, Camera, fl_chart |
+| Native Features | Member 6 | Camera + permission_handler |
+| API Integration | Member 5 | REST API + Firestore |
+| Local Storage | Member 4 | SharedPreferences |
+| Data Modeling | Member 4 | Expense class with serialization |
+| Navigation Patterns | Member 3 | TabBar + Named Routes |
+| UI/UX Components | Member 2 | Forms, badges, profile layout |
+| Authentication Flow | Member 1 | Firebase Auth email/password |
 
 ---
 
