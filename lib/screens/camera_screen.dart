@@ -16,7 +16,7 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize the camera controller (Lab 5)
+    // Initialize the camera controller  *
     _controller = CameraController(
       defaultCamera,
       ResolutionPreset.medium,
@@ -26,7 +26,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
   @override
   void dispose() {
-    // Dispose of the controller when the widget is removed (Lab 3 Lifecycle)
+    // Dispose of the controller when the widget is removed *
     _controller.dispose();
     super.dispose();
   }
@@ -35,7 +35,7 @@ class _CameraScreenState extends State<CameraScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Take Receipt Photo')),
-      // FutureBuilder waits for the camera to initialize (Lab 5)
+      // FutureBuilder waits for the camera to initialize before displaying the preview *
       body: FutureBuilder<void>(
         future: _initializeControllerFuture,
         builder: (context, snapshot) {
@@ -50,9 +50,9 @@ class _CameraScreenState extends State<CameraScreen> {
         onPressed: () async {
           try {
             await _initializeControllerFuture;
-            // Take the picture
+            // Take the picture *
             final image = await _controller.takePicture();
-            // Pass the image path back to the previous screen (Lab 4 Navigation)
+            // Pass the image path back to the previous screen to save it with the expense *
             if (!context.mounted) return;
             Navigator.pop(context, image.path);
           } catch (e) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// This class uses ChangeNotifier just like the UserProvider in Lab 7
+// This class uses ChangeNotifier 
 class ThemeProvider with ChangeNotifier {
   bool _isDarkMode = false;
 

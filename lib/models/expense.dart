@@ -4,7 +4,7 @@ class Expense {
   final double amount;
   final DateTime date;
   final String category;
-  final String? receiptPath; // 1. Added optional receipt path
+  final String? receiptPath; 
 
   Expense({
     required this.id,
@@ -12,7 +12,7 @@ class Expense {
     required this.amount,
     required this.date,
     required this.category,
-    this.receiptPath, // 2. Added to constructor
+    this.receiptPath, 
   });
 
   Map<String, dynamic> toJson() => {
@@ -21,7 +21,7 @@ class Expense {
     'amount': amount,
     'date': date.toIso8601String(),
     'category': category,
-    'receiptPath': receiptPath, // 3. Save it to JSON
+    'receiptPath': receiptPath, 
   };
 
   factory Expense.fromJson(Map<String, dynamic> json) => Expense(
@@ -30,6 +30,6 @@ class Expense {
     amount: (json['amount'] as num).toDouble(),
     date: DateTime.parse(json['date']),
     category: json['category'],
-    receiptPath: json['receiptPath'], // 4. Load it from JSON
+    receiptPath: json['receiptPath'], 
   );
 }

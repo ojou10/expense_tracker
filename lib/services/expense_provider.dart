@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // 1. ADD FIRESTORE IMPORT
+import 'package:cloud_firestore/cloud_firestore.dart'; 
 import '../models/expense.dart';
 
 class ExpenseProvider with ChangeNotifier {
@@ -31,12 +31,12 @@ class ExpenseProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // UPDATED: Now saves locally AND to the Cloud API (Req 7 & 8)
+  // saves locally AND to the Cloud API 
   Future<void> addExpense(Expense expense) async {
     _expenses.insert(0, expense); 
     notifyListeners();
     
-    // Requirement 7: Store Data Locally
+    //  Store Data Locally
     final prefs = await SharedPreferences.getInstance();
     final String encodedData = json.encode(_expenses.map((e) => e.toJson()).toList());
     await prefs.setString(_storageKey, encodedData);

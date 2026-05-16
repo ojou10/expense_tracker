@@ -25,7 +25,7 @@ class HistoryScreen extends StatelessWidget {
             Expanded(
               child: expenses.isEmpty 
                 ? const Center(child: Text("No expenses added yet!"))
-                : ListView.builder(
+                : ListView.builder( //render currently visible items on the screen, better performance than ListView *
                 itemCount: expenses.length,
                 itemBuilder: (context, index) {
                   final expense = expenses[index];
@@ -53,7 +53,7 @@ class HistoryScreen extends StatelessWidget {
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min, // Keeps the row tight to the right side
                         children: [
-                          // Only show the button if there is a receipt path
+                          // Only show the button if there is a receipt path  *
                           if (expense.receiptPath != null)
                             IconButton(
                               icon: const Icon(Icons.receipt_long, color: Colors.blue),

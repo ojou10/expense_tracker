@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-// This is your own custom stateless component (Lab 3 concept)
+//  custom stateless component
 class CategoryBadge extends StatelessWidget {
   final String category;
 

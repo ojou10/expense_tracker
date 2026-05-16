@@ -39,7 +39,6 @@ class _LoginScreenState extends State<LoginScreen> {
       }
       
       if (mounted) {
-        // Now it knows what ExpenseProvider is!
         Provider.of<ExpenseProvider>(context, listen: false).loadExpenses();
         Navigator.pushReplacementNamed(context, '/home');
       }

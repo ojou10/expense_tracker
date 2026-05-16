@@ -53,7 +53,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     // Clear form
     _titleController.clear();
     _amountController.clear();
-    setState(() => receiptImagePath = null);
+    setState(() => receiptImagePath = null);  
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Expense Added!')),

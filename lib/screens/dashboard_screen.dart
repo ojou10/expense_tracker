@@ -34,7 +34,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Grab the REAL list of expenses from the Provider
+    //  Grab the REAL list of expenses from the Provider
     final expenses = Provider.of<ExpenseProvider>(context).expenses;
 
     double totalExpensesUSD = 0;
@@ -43,7 +43,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     double billsTotal = 0;
     double otherTotal = 0;
 
-    for (var expense in expenses) {
+    for (var expense in expenses) {   //*
       totalExpensesUSD += expense.amount;
       
       if (expense.category == 'Food') {

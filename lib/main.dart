@@ -27,12 +27,12 @@ Future<void> main() async {
     print('Error initializing camera: $e');
   }
 
-  // Wrap the app in the ChangeNotifierProvider (Lab 7 concept)
+  
  runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => ExpenseProvider()), // New!
+        ChangeNotifierProvider(create: (_) => ExpenseProvider()), 
       ],
       child: const ExpenseTrackerApp(),
     ),
@@ -61,7 +61,7 @@ class ExpenseTrackerApp extends StatelessWidget {
         textTheme: ThemeData.dark().textTheme.apply(fontFamily: 'Poppins'),
       ),
       
-      // Lab 4: Using Named Routes
+     
       initialRoute: '/',
       routes: {
         '/': (context) => const LoginScreen(),
